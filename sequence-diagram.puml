@@ -1,0 +1,20 @@
+@startuml
+actor "CI/CD System" as CICD
+actor WebPlatform
+participant QueueService
+participant "Google Cloud Tasks" as GCT
+participant "Pipecat Tester Service" as Pipecat
+
+CICD -> Pipecat : Webhook / POST /trigger-test
+note right: triggered on deploy,\nmerge to main, etc.
+
+
+WebPlatform -> QueueService : POST /create-task
+QueueService -> GCT : create task
+activate GCT
+GCT -> WebPlatform : POST /api/call/process-call
+deactivate GCT
+WebPlatform -> Pipecat : POST /initiate_phone_call
+WebPlatform -> Pipecat : GET /call_status (short polling)
+
+@enduml
