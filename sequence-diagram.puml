@@ -1,4 +1,5 @@
-@startuml
+
+
 actor "CI/CD System" as CICD
 actor WebPlatform
 
@@ -6,17 +7,15 @@ participant QueueService
 participant "Google Cloud Tasks" as GCT
 participant "Pipecat Tester Service" as Pipecat
 
-CICD -> Pipecat : POST /api/v1/simulations
-note right: triggered on deploy,\nmerge to main, etc.\nvalidates payload, creates simulation,\nenqueues outbound calls,\nreturns status_url GET /api/v1/simulations/{simulationId}
-CICD -> Pipecat : GET /api/v1/simulations/{simulationId} (short polling)
+CICD -> WebPlatform : /1/ POST /api/v1/simulations
+CICD -> WebPlatform : /2/ GET /api/v1/simulations/{simulationId} (short polling)
 
 
-WebPlatform -> QueueService : POST /create-task
-QueueService -> GCT : create task
+WebPlatform -> QueueService : /3/ POST /create-task
+QueueService -> GCT : /4/ create task
 activate GCT
-GCT -> WebPlatform : POST /api/call/process-call
+GCT -> WebPlatform : /5/ POST /api/call/process-call
 deactivate GCT
-WebPlatform -> Pipecat : POST /initiate_phone_call
-WebPlatform -> Pipecat : GET /call_status/{callSid} (short polling)
+WebPlatform -> Pipecat : /6/ POST /initiate_phone_call
+WebPlatform -> Pipecat : /7/ GET /call_status/{callSid} (short polling)
 
-@enduml
